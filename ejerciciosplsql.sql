@@ -356,14 +356,54 @@ PROCEDURE ejercicio14 IS
     
 END ejercicio14;
 
--- TODO
-PROCEDURE ejercicio15 IS
 
+
+
+PROCEDURE ejercicio15 IS
+    
+    id_forma_envio  forma_envio.id_fe%type;
+    
+    nfilas          NUMBER;
+    nenvios         NUMBER;
+    
     BEGIN
-        DBMS_OUTPUT.PUT_LINE('TO DO');
+        
+        FOR fila_forma_envio IN (SELECT id_fe FROM forma_envio) LOOP
+        
+            SELECT COUNT(nenvio) INTO nenvios 
+                FROM envio WHERE forma_envio = fila_forma_envio.id_fe;
+            
+            DBMS_OUTPUT.PUT_LINE(fila_forma_envio.id_fe || ' ' || nenvios);
+            
+            IF nenvios = 0 THEN 
+            
+                DBMS_OUTPUT.PUT_LINE('La forma de envio numero ' || fila_forma_envio.id_fe || ' no tiene envios, finalizando bucle... ');
+                EXIT;
+                
+            END IF;
+            
+            
+        END LOOP;
+        
+        
 END ejercicio15;
 
 
+
+
+--TODO
+PROCEDURE ejercicio16 IS
+
+
+
+    BEGIN
+        
+        FOR fila_lpedido IN ()
+    
+
+    
+    
+END ejercicio16;
 
 
 BEGIN
@@ -379,7 +419,8 @@ BEGIN
 --ejercicio12;
 --ejercicio13;
 --ejercicio14;
-ejercicio15;
+--ejercicio15;
+ejercicio16;
 --DBMS_OUTPUT.PUT_LINE('a');
 
 END;
