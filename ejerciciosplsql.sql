@@ -405,9 +405,17 @@ PROCEDURE ejercicio16 IS
         FOR fila_lpedido IN (SELECT referencia, descripcion, pvp, dto_venta, und_disponibles
                                 FROM lpedido 
                                 JOIN articulo USING(referencia)
-                                where npedido = 15 
-                                fetch first 5 rows only) LOOP
-                                
+                                WHERE npedido = 15 
+                                FETCH FIRST 5 ROWS ONLY) LOOP
+        
+        /*
+        select referencia, descripcion, pvp, dto_venta 
+            from lpedido 
+            join articulo using(referencia)
+            where npedido = 15 
+            fetch first 5 rows only;
+        */
+        
             IF fila_lpedido.pvp > 5 THEN
                 DBMS_OUTPUT.PUT_line('Es mayor que 2');
                                 
@@ -431,13 +439,26 @@ PROCEDURE ejercicio16 IS
     
     
 END ejercicio16;
-/*
-select referencia, descripcion, pvp, dto_venta 
-    from lpedido 
-    join articulo using(referencia)
-    where npedido = 15 
-    fetch first 5 rows only;
-*/
+
+
+PROCEDURE ejercicio17 IS
+
+    BEGIN
+    
+        FOR fila_factura IN (SELECT nfactura 
+                                FROM factura 
+                                ORDER BY nfactura DESC
+                                FETCH FIRST 5 ROWS ONLY) LOOP
+                                
+            DBMS_OUTPUT.PUT_line(fila_factura.nfactura);
+
+            
+        END LOOP;
+    
+END ejercicio17;    
+
+
+
 
 BEGIN
 --ejercicio3;
@@ -453,7 +474,8 @@ BEGIN
 --ejercicio13;
 --ejercicio14;
 --ejercicio15;
-ejercicio16;
+--ejercicio16;
+ejercicio17;
 --DBMS_OUTPUT.PUT_LINE('a');
 
 END;
