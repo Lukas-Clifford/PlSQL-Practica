@@ -1,3 +1,5 @@
+SET SERVEROUTPUT ON;
+
 
 DECLARE
 
@@ -391,20 +393,51 @@ END ejercicio15;
 
 
 
---TODO
+
 PROCEDURE ejercicio16 IS
 
 
 
     BEGIN
-        
-        FOR fila_lpedido IN ()
     
-
+        DBMS_OUTPUT.PUT_line('');
+        
+        FOR fila_lpedido IN (SELECT referencia, descripcion, pvp, dto_venta, und_disponibles
+                                FROM lpedido 
+                                JOIN articulo USING(referencia)
+                                where npedido = 15 
+                                fetch first 5 rows only) LOOP
+                                
+            IF fila_lpedido.pvp > 5 THEN
+                DBMS_OUTPUT.PUT_line('Es mayor que 2');
+                                
+                DBMS_OUTPUT.PUT(fila_lpedido.referencia     || ' ');
+                DBMS_OUTPUT.PUT(fila_lpedido.descripcion    || ' ');
+                DBMS_OUTPUT.PUT(fila_lpedido.pvp            || ' ');
+                DBMS_OUTPUT.PUT(fila_lpedido.dto_venta      || ' ');
+                DBMS_OUTPUT.PUT_line('');
+            
+            ELSE 
+                DBMS_OUTPUT.PUT_line('Es MENOR que 2');
+                
+                DBMS_OUTPUT.PUT(fila_lpedido.referencia         || ' ');
+                DBMS_OUTPUT.PUT(fila_lpedido.descripcion        || ' ');
+                DBMS_OUTPUT.PUT(fila_lpedido.und_disponibles    || ' ');
+                DBMS_OUTPUT.PUT_line('');
+            
+            END IF;
+            
+        END LOOP;
     
     
 END ejercicio16;
-
+/*
+select referencia, descripcion, pvp, dto_venta 
+    from lpedido 
+    join articulo using(referencia)
+    where npedido = 15 
+    fetch first 5 rows only;
+*/
 
 BEGIN
 --ejercicio3;
