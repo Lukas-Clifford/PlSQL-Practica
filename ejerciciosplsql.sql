@@ -65,25 +65,23 @@ END ejercicio5;
 PROCEDURE ejercicio6 IS
 
     pedido_count    NUMBER;
-    importe         NUMBER;
     
     BEGIN
     
-    SELECT COUNT(npedido) INTO pedido_count 
+    SELECT COUNT(distinct nenvio) INTO pedido_count 
         FROM lenvio WHERE npedido = 3;
     
     IF pedido_count > 1 THEN
     
-        FOR i IN 1..pedido_count LOOP
+        FOR fila IN (SELECT precio, dto, npedido 
+                        FROM lpedido 
+                        JOIN lenvio USING (nlinea, npedido)
+                        WHERE npedido = 3) LOOP
+            
+            DBMS_OUTPUT.PUT_LINE(fila.precio - fila.precio*fila.dto);
         
-            SELECT precio - (precio * dto) 
-                INTO importe
-                FROM lpedido
-                WHERE npedido = 3 
-                AND nlinea = i;
-                
-            DBMS_OUTPUT.PUT_LINE(importe);
         END LOOP;
+    
     END IF;
             
 END ejercicio6;
@@ -442,21 +440,145 @@ END ejercicio16;
 
 
 PROCEDURE ejercicio17 IS
-
+    -- TOTAL DE FACTURA??
     BEGIN
     
-        FOR fila_factura IN (SELECT nfactura 
+        FOR fila IN (SELECT nfactura, fecha
                                 FROM factura 
                                 ORDER BY nfactura DESC
                                 FETCH FIRST 5 ROWS ONLY) LOOP
                                 
-            DBMS_OUTPUT.PUT_line(fila_factura.nfactura);
+            DBMS_OUTPUT.PUT_line(
+            fila.nfactura || ' ' || fila.fecha );
 
             
         END LOOP;
     
 END ejercicio17;    
 
+
+
+PROCEDURE ejercicio18 IS
+    
+    contador_lineas     NUMBER;
+    suma_importes       NUMBER(8,2);
+    
+    BEGIN
+        FOR dia IN 1..31 LOOP
+            SELECT COUNT(npedido), SUM(precio-precio*dto)
+                INTO contador_lineas, suma_importes
+                FROM lpedido 
+                JOIN pedido USING (npedido)
+                WHERE EXTRACT (DAY FROM fecha) = dia
+                AND EXTRACT (MONTH FROM fecha) = 1
+                ;
+            
+            IF contador_lineas = 0 THEN
+                DBMS_OUTPUT.PUT_LINE('DIA ' || dia || ' NO HAY LINEAS');
+                --EXIT; -- SALIR DEL BUCLE CUANDO NO HAY LINEAS
+            ELSE
+                DBMS_OUTPUT.PUT_LINE(dia || ': ' ||
+                contador_lineas || '    ' || suma_importes);
+            END IF;
+            
+        END LOOP;
+        
+
+END ejercicio18;
+
+PROCEDURE ejercicio19 IS
+
+    nif             cliente.nif%type;
+    nombre          cliente.nombre%type;
+    apellidos       cliente.apellidos%type;
+    nlineas         NUMBER;
+    
+
+    BEGIN
+    
+        FOR fila IN (SELECT npedido, total_pedido, nif 
+                        FROM pedido 
+                        FETCH FIRST 5 ROWS ONLY) LOOP
+                        
+            DBMS_OUTPUT.PUT(fila.npedido || ': ');
+            
+            -- lo cambio a 100 para ver las dos opciones
+            IF fila.total_pedido >= 100 THEN
+                
+                SELECT nif, nombre, apellidos INTO nif, nombre, apellidos
+                    FROM cliente WHERE nif = fila.nif;
+                
+                DBMS_OUTPUT.PUT_LINE(
+                nif || ' ' || nombre || ' ' || apellidos);
+                
+            ELSE
+                
+                SELECT COUNT(npedido) INTO nlineas 
+                    FROM lpedido WHERE npedido = fila.npedido;
+                
+                DBMS_OUTPUT.PUT_LINE('Tiene ' || nlineas || ' lineas');
+                
+            END IF;
+            
+        END LOOP;
+    
+END ejercicio19;    
+
+
+--NO TERMINADO
+PROCEDURE ejercicio20 IS
+    
+    nenvio      envio.nenvio%type;
+    fecha       envio.fecha%type;
+    
+    BEGIN
+    
+        FOR fila IN (SELECT npedido
+                        FROM lenvio
+                        GROUP BY npedido
+                        HAVING COUNT(nenvio) > 1) LOOP
+                        
+            DBMS_OUTPUT.PUT_LINE('POR HACER');
+                       
+        END LOOP;
+        
+        
+    
+END ejercicio20;
+
+
+/*
+SELECT nenvio, npedido
+    FROM lenvio
+    GROUP BY nenvio, npedido
+    ;
+*/
+
+
+PROCEDURE ejercicio21 IS
+    
+    provincia_check direccion_envio.provincia%type;
+    
+
+    BEGIN
+    
+        FOR fila IN (SELECT DISTINCT npedido, fecha, total_pedido, nif, nombre, ventas, provincia
+                        FROM pedido 
+                        JOIN cliente USING(nif)
+                        JOIN direccion_envio USING(nif)
+                        FETCH FIRST 10 ROWS ONLY) LOOP
+                        
+            IF fila.provincia = 'Córdoba' THEN
+                DBMS_OUTPUT.PUT_LINE(fila.nif || ' ' || fila.nombre || ' ' || fila.ventas);
+            
+            ELSE 
+                DBMS_OUTPUT.PUT_LINE(fila.fecha || ' ' || fila.total_pedido);
+
+            END IF;
+        
+        END LOOP;
+    
+END ejercicio21;
 
 
 
@@ -475,7 +597,12 @@ BEGIN
 --ejercicio14;
 --ejercicio15;
 --ejercicio16;
-ejercicio17;
+--ejercicio17; --COMO SACAR TOTAL FACTURA?
+--ejercicio18;
+--ejercicio19;
+--ejercicio20; -- NO HECHO
+ejercicio21;
+
 --DBMS_OUTPUT.PUT_LINE('a');
 
 END;
