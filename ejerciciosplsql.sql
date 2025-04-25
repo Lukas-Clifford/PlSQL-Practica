@@ -97,14 +97,15 @@ PROCEDURE ejercicio7 IS
             JOIN lpedido USING (npedido)
             WHERE referencia = 'FRUT0001';
         
-        SELECT pvp INTO pvp_art_reciente
-            FROM articulo
-            WHERE referencia = 'FRUT0001';
-
         
         DBMS_OUTPUT.PUT_LINE(fecha_art_reciente);
         
+        
         IF fecha_art_reciente < '01/02/2025' THEN
+        
+            SELECT pvp INTO pvp_art_reciente
+                FROM articulo
+                WHERE referencia = 'FRUT0001';
         
             IF pvp_art_reciente > 1.5 THEN
             
@@ -547,13 +548,6 @@ PROCEDURE ejercicio20 IS
 END ejercicio20;
 
 
-/*
-SELECT nenvio, npedido
-    FROM lenvio
-    GROUP BY nenvio, npedido
-    ;
-*/
-
 
 PROCEDURE ejercicio21 IS
     
@@ -581,6 +575,58 @@ PROCEDURE ejercicio21 IS
 END ejercicio21;
 
 
+PROCEDURE ver_ventas_cliente(input_nif cliente.nif%TYPE) IS
+    
+    out_ventas cliente.ventas%type;
+    
+    BEGIN
+    
+        SELECT ventas INTO out_ventas FROM cliente WHERE nif = input_nif;
+        DBMS_OUTPUT.PUT_LINE(out_ventas);
+
+END ver_ventas_cliente;
+
+
+PROCEDURE ejercicio22 IS
+
+    BEGIN ver_ventas_cliente('30000005A');
+    
+END ejercicio22;
+
+
+
+FUNCTION sumar_totales_pedido(input_nif cliente.nif%TYPE) 
+RETURN NUMBER AS
+    
+    suma NUMBER;
+    
+    BEGIN
+    
+        SELECT SUM(total_pedido) 
+            INTO suma 
+            FROM pedido 
+            WHERE nif = input_nif;
+        
+        RETURN suma;
+
+END sumar_totales_pedido;
+
+
+PROCEDURE ejercicio23 IS
+
+    BEGIN
+        DBMS_OUTPUT.PUT_LINE(sumar_totales_pedido('30000005A'));
+
+END ejercicio23;
+
+
+PROCEDURE ejercicio24 IS
+
+    BEGIN
+        DBMS_OUTPUT.PUT_LINE('TO DO');
+END ejercicio24;
+
+
 
 BEGIN
 --ejercicio3;
@@ -600,8 +646,12 @@ BEGIN
 --ejercicio17; --COMO SACAR TOTAL FACTURA?
 --ejercicio18;
 --ejercicio19;
---ejercicio20; -- NO HECHO
-ejercicio21;
+--ejercicio20; -- NO HECHO, no entiendo lo de leer los envios de los pedidos que tengan mas de un envio
+--ejercicio21;
+
+--ejercicio22;
+--ejercicio23;
+ejercicio24;
 
 --DBMS_OUTPUT.PUT_LINE('a');
 
