@@ -1,0 +1,145 @@
+SET SERVEROUTPUT ON;
+
+-- EJERCICIO 28, no se pueden hacer funciones
+-- almacenadas dentro de un subprograma
+
+
+CREATE OR REPLACE 
+    FUNCTION fecha_pedido_reciente(
+                nif_cliente     cliente.nif%type,
+                valor           pedido.total_pedido%type
+                ) 
+    RETURN pedido.fecha%type IS
+        
+        fecha_ultimo_pedido pedido.fecha%type;
+        
+        BEGIN
+        
+            SELECT MAX(fecha) 
+                INTO fecha_ultimo_pedido
+                FROM pedido
+                WHERE total_pedido > 100;
+                
+            RETURN fecha_ultimo_pedido;
+    
+    END fecha_pedido_reciente;
+
+/
+
+
+
+--ejercicio28
+DECLARE
+    
+    nif_cliente         cliente.nif%type := '30000001A';
+    nombre_cliente      cliente.nombre%type;
+    apellidos_cliente   cliente.apellidos%type;
+    cantidad_a_superar  NUMBER := 100;
+    
+    BEGIN
+        
+        SELECT nombre, apellidos 
+            INTO nombre_cliente, apellidos_cliente
+            FROM cliente
+            WHERE nif = nif_cliente;
+        
+        
+        DBMS_OUTPUT.PUT_LINE(
+        nif_cliente         || ', ' ||
+        nombre_cliente      || ', ' ||
+        apellidos_cliente   || ', ' ||
+        fecha_pedido_reciente(nif_cliente,cantidad_a_superar)
+        );
+        
+
+END;
+
+
+/
+
+
+--EJERCICIO 37
+DECLARE
+    
+    CURSOR c (  fecha_venta     pedido.fecha%type,
+                categoria       articulo.categoria%type   )
+    IS SELECT UNIQUE referencia, pvp, descripcion 
+        FROM articulo
+        JOIN lpedido USING (referencia)
+        JOIN pedido USING (npedido)
+        WHERE categoria = c.categoria
+            AND fecha = fecha_venta;
+    
+    refe    articulo.referencia%type;
+    p       articulo.pvp%type;
+    des     articulo.descripcion%type;
+    
+    BEGIN
+        OPEN c(TO_DATE('01/01/2025'),'CONF');
+        LOOP 
+            FETCH c INTO refe, p, des;
+            EXIT WHEN c%NOTFOUND;
+            
+            DBMS_OUTPUT.PUT_LINE(refe || ', ' || p || ', ' || des);
+            
+        END LOOP;
+        
+END;
+
+
+
+/
+
+
+--EJERCICIO 54
+
+/*
+si se ha pasado un número de línea 
+y si no ha sido así hay que generar uno automáticamente
+sumando uno al número de línea mayor del mismo pedido
+*/
+
+--Creacion de trigger
+
+--NO SE PUEDE CAMBIAR TABLA EN LA QUE ESTA ACTUANDO UN TRIGGER
+--¿COMO SE HACE?
+
+CREATE OR REPLACE TRIGGER t_nlinea 
+AFTER INSERT ON lpedido
+FOR EACH ROW
+
+DECLARE
+
+BEGIN 
+    DBMS_OUTPUT.PUT_LINE('ACTUALIZANDO IMPORTE DE '|| :NEW.npedido);
+    
+    UPDATE lpedido 
+        SET importe = :NEW.unidades * (:NEW.precio - :NEW.precio * :NEW.dto)
+        WHERE npedido = :NEW.npedido 
+            AND nlinea = :NEW.nlinea;
+            
+    DBMS_OUTPUT.PUT_LINE('TERMINADO');
+    
+END;
+
+/
+
+DECLARE
+
+    r    lpedido%ROWTYPE;
+
+    BEGIN
+        SELECT * INTO r FROM lpedido WHERE npedido = 132 AND nlinea = 5;
+        
+        INSERT INTO lpedido (npedido, nlinea, referencia, unidades, precio, dto)
+        VALUES(
+            r.npedido,
+            r.nlinea+1,
+            r.referencia,
+            r.unidades,
+            r.precio,
+            r.dto
+        );
+    
+    
+END;
