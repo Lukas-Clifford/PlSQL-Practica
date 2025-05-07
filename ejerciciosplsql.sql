@@ -620,11 +620,79 @@ PROCEDURE ejercicio23 IS
 END ejercicio23;
 
 
+FUNCTION sumar_und_disponibles_categoria(input_cat articulo.categoria%TYPE) 
+RETURN NUMBER AS
+    
+    suma NUMBER;
+    
+    BEGIN
+    
+        SELECT SUM(und_disponibles) 
+            INTO suma 
+            FROM articulo 
+            WHERE categoria = input_cat;
+        
+        RETURN suma;
+
+END sumar_und_disponibles_categoria;
+
 PROCEDURE ejercicio24 IS
+    
+    input_categoria         categoria.id_categoria%type := 'FRUT';
+    categoria_descripcion   categoria.descripcion%type;
+    
+    BEGIN
+        SELECT descripcion 
+            INTO categoria_descripcion 
+            FROM categoria 
+            WHERE id_categoria = input_categoria;
+    
+        DBMS_OUTPUT.PUT_LINE('CATEGORIA: ' || input_categoria);
+        DBMS_OUTPUT.PUT_LINE('Descripcion: ' || categoria_descripcion);
+        DBMS_OUTPUT.PUT_LINE('Unidades disponibles: ' || sumar_und_disponibles_categoria('FRUT'));
+        
+END ejercicio24;
+
+
+PROCEDURE visualizar_articulo(referencia_articulo articulo.referencia%type) IS
+
+    descripcion_articulo    articulo.descripcion%type;
+    fecha_primera           pedido.fecha%type;
+    fecha_ultima            pedido.fecha%type;
+    
+    BEGIN 
+        
+        SELECT descripcion 
+            INTO descripcion_articulo 
+            FROM articulo 
+            WHERE referencia = referencia_articulo;
+        
+        SELECT MAX(fecha), MIN(fecha) 
+            INTO fecha_ultima, fecha_primera
+            FROM pedido 
+            JOIN lpedido USING (npedido) 
+            WHERE referencia = referencia_articulo;
+        
+        DBMS_OUTPUT.PUT(referencia_articulo || ' ');
+        DBMS_OUTPUT.PUT(descripcion_articulo || ' ');
+        DBMS_OUTPUT.PUT(fecha_primera || ' ');
+        DBMS_OUTPUT.PUT(fecha_ultima || ' ');
+        DBMS_OUTPUT.PUT_LINE('');
+            
+END visualizar_articulo;
+
+
+PROCEDURE ejercicio25 IS
 
     BEGIN
-        DBMS_OUTPUT.PUT_LINE('TO DO');
-END ejercicio24;
+        visualizar_articulo('CONF0001');
+
+END ejercicio25;
+
+/*referencia de artículo, su descripción, la fecha en que se vendió por primera
+vez y la fecha en que se vendió por última vez*/
+
+
 
 
 
@@ -651,7 +719,10 @@ BEGIN
 
 --ejercicio22;
 --ejercicio23;
-ejercicio24;
+--ejercicio24;
+ejercicio25;
+
+
 
 --DBMS_OUTPUT.PUT_LINE('a');
 
